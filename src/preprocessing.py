@@ -3,7 +3,7 @@ from sklearn.cluster import AffinityPropagation, KMeans
 from TSPparser import read_instance_from_file
 import matplotlib.pyplot as plt
 
-def affinity_propagation(points, damping=0.5, max_iter=200, convergence_iter=15, copy=True, preference=None,
+def affinity_propagation(points, damping=0.5, max_iter=1000, convergence_iter=15, copy=True, preference=None,
                          affinity='euclidean', verbose=False, random_state=None):
     """
     Clusters the given points using the affinity propagation algorithm.
@@ -24,7 +24,7 @@ def affinity_propagation(points, damping=0.5, max_iter=200, convergence_iter=15,
     labels = af.labels_
     return cluster_centers_indices, labels
 
-def k_means(points, n_clusters=8, init='k-means++', n_init=10, max_iter=10000, tol=0.0001,
+def k_means(points, n_clusters=8, init='k-means++', n_init=10, max_iter=1000, tol=0.0001,
             verbose=0, random_state=None, copy_x=True, algorithm='lloyd'):
     """
     Clusters the given points using the k-means algorithm.
@@ -47,11 +47,14 @@ def k_means(points, n_clusters=8, init='k-means++', n_init=10, max_iter=10000, t
     return cluster_centers, labels
 
 if __name__ == '__main__':
-    inst = read_instance_from_file("TSP/Instances_TSP/berlin52.tsp")
+    inst = read_instance_from_file("TSP/Instances_TSP/fnl4461.tsp")
     print(inst)
 
-    cluster_centers_indices_af, labels_af = affinity_propagation(inst["COORDS"])
+    cluster_centers_indices_af, labels_af = affinity_propagation(inst["COORDS"], damping=0.5)
     cluster_centers_km, labels_km = k_means(inst["COORDS"], len(cluster_centers_indices_af))
+    rearrange = np.random.permutation(len(cluster_centers_indices_af))
+    cluster_centers_indices_af = cluster_centers_indices_af[rearrange]
+    labels_af = np.array([np.where(rearrange == i)[0][0] for i in labels_af])
     # Plot both methods on side by side plots
     fig, axs = plt.subplots(1, 2)
     fig.suptitle('Clustering')
@@ -69,5 +72,7 @@ if __name__ == '__main__':
     for i in range(len(inst["COORDS"])):
         axs[1].plot([inst["COORDS"][i, 0], inst["COORDS"][cluster_centers_indices_af[labels_af[i]], 0]], [inst["COORDS"][i, 1], inst["COORDS"][cluster_centers_indices_af[labels_af[i]], 1]], color='black', alpha=0.5, linewidth=0.5, linestyle='--')
     axs[1].set_title('Affinity propagation')
-
     plt.show()
+
+    print("K-means cluster centers:\n", cluster_centers_km)
+    print("Affinity propagation cluster centers:\n", inst["COORDS"][cluster_centers_indices_af])
