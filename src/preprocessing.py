@@ -46,6 +46,23 @@ def k_means(points, n_clusters=8, init='k-means++', n_init=10, max_iter=1000, to
     labels = km.labels_
     return cluster_centers, labels
 
+def plot_km(points, labels, cluster_centers):
+    """
+    Plots the clustering obtained by the k-means algorithm.
+    :param points: the points
+    :param labels: the labels of the points
+    :param cluster_centers: the cluster centers
+    """
+    fig, ax = plt.subplots()
+    # K-means plot
+    ax.scatter(points[:, 0], points[:, 1], c=labels)
+    # plot lines between points and their cluster centers
+    for i in range(len(points)):
+        ax.plot([points[i, 0], cluster_centers[labels[i], 0]], [points[i, 1], cluster_centers[labels[i], 1]], color='black', alpha=0.5, linewidth=0.5, linestyle='--')
+    ax.set_title('K-means')
+    plt.show()
+    
+
 if __name__ == '__main__':
     inst = read_instance_from_file("TSP/Instances_TSP/fnl4461.tsp")
     print(inst)

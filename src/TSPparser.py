@@ -31,4 +31,4 @@ def read_instance_from_file(file_path: str) -> None:
                         x_coord = float(parts[1])
                         y_coord = float(parts[2])
                         tsp_data["COORDS"][node_id - 1] = [x_coord, y_coord]
-        return tsp_data
+        return tsp_data["COORDS"]
