@@ -1,0 +1,5 @@
+julia
+import Pkg
+Pkg.add("JuMP")
+Pkg.add("CPLEX")
+Pkg.add("Shuffle")
