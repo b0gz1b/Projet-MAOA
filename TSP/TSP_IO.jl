@@ -12,8 +12,8 @@ end
 # Lecture d'un fichier de la TSPLIB .tsp (atttention uniquement les instances symétriques données par des coordonnées)
 # Renvoie l'instance du TSP c
 function Read_undirected_TSP(filename)
-
-       I = NuagePoints(0, [], [],0)
+	
+	I = NuagePoints(0, [], [],0)
 
 	open(filename) do f
 			
@@ -127,6 +127,17 @@ function Compute_value_TSP(I, S)
 
 end
 
+# calcule la somme des coûts de notre arête solution
+function Compute_value_RingStar(I, S)
+	
+	res = ((I.X[S[1]] - I.X[S[end]])^2 + (I.Y[S[1]] - I.Y[S[end]])^2)^(0.5)
+	for i = 1:(length(S) -1)	
+		res = res + ((I.X[S[i]] - I.X[S[i+1]])^2 + (I.Y[S[i]] - I.Y[S[i+1]])^2)^(0.5)
+	end
+	
+	return res
+
+end
 
 # permet de visualiser notre solution (un circuit / cycle) dans un fichier pdf dont le nom est spécifié en paramètres
 # La solution est donnée par la liste ordonné des points à visiter commençant par 1

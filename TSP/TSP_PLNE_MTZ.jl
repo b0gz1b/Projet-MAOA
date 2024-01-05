@@ -1,3 +1,4 @@
+using MathOptInterface
 using JuMP
 using CPLEX
 using CPUTime
@@ -17,8 +18,14 @@ function PLNE_TSP_MTZ(G)
 	@variable(m, x[1:G.nb_points, 1:G.nb_points], Bin)
 	@variable(m, u[1:G.nb_points])    # variables continues
 	# on peut mettre aussi @variable(m, u[1:G.nb_points], Int) si on veut indiquer à Cplex que les u sont entiers, mais ce n'est pas nécessaire
-
-	@objective(m, Min, sum((sum(x[i, j] * c[i, j]) for j = 1:G.nb_points) for i = 1:G.nb_points ) )
+	# Z = zero(AffExpr)
+	# for i in 1:G.nb_points
+	# 	for j in 1:G.nb_points
+	# 		Z += sum(x[i, j] * c[i, j])
+	# 	end
+	# end
+	# @objective(m, Min, Z)
+	@objective(m, Min, sum(sum(x[i, j] * c[i, j] for j = 1:G.nb_points) for i = 1:G.nb_points ) )
 
 	# contraite pour dire "une arête entrante dans un sommet"
 	for i in 1:G.nb_points
@@ -72,7 +79,7 @@ function PLNE_TSP_MTZ(G)
 	status = termination_status(m)
 
 	# un petit affichage sympathique
-	if status == JuMP.MathOptInterface.OPTIMAL
+	if status == MathOptInterface.OPTIMAL
 		println("Valeur optimale = ", objective_value(m))
 		println("Solution primale optimale :")
 		
