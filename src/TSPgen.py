@@ -1,12 +1,12 @@
 import numpy as np
 import networkx as nx
-from TSPparser import read_instance_from_file
+from TSP import TSP
 from preprocessing import affinity_propagation, k_means, plot_km
 import matplotlib.pyplot as plt
-try:
-    from concorde.tsp import TSPSolver
-except ImportError:
-    pass
+# try:
+#     from concorde.tsp import TSPSolver
+# except ImportError:
+#     pass
 
 def GTSP_to_ATSP(points, labels):
     """
@@ -126,6 +126,8 @@ def ATSPtour_to_GTSPtour(tour, labels):
             gtsp_tour.append(tour[(i + 1) % len(tour)])
     return gtsp_tour
 
+
+
 def plot_tour(points, labels, tour, file_path=None):
     """
     Plots a tour.
@@ -148,13 +150,13 @@ def plot_tour(points, labels, tour, file_path=None):
     else:    
         plt.savefig(file_path)
 if __name__ == '__main__':
-    points = read_instance_from_file("TSP/Instances_TSP/PLS_21.tsp")
-    cluster_centers_km, labels_km = k_means(points, n_clusters=4, n_init=100)
+    inst = TSP.from_file("TSP/Instances_TSP/PLS_21.tsp")
+    cluster_centers_km, labels_km = k_means(inst.points, n_clusters=4, n_init=100)
     # labels_km = [0,3,0,3,1,1,2,1,0,2,2,0,3,1,3,1,1,1,2,0,0]
     # plot_km(points, labels_km, cluster_centers_km)
-    G = GTSP_to_ATSP(points, labels_km)
+    G = GTSP_to_ATSP(inst.points, labels_km)
     plt.figure()
-    nx.draw(G, pos=points, with_labels=True, font_weight='bold')
+    nx.draw(G, pos=inst.points, with_labels=True, font_weight='bold')
     plt.savefig("tmp/G.png")
     H = ATSP_to_TSP(G)
     # Draw the new nodes added to H compared to G
@@ -162,19 +164,19 @@ if __name__ == '__main__':
     nx.draw(H, pos=nx.spring_layout(H), with_labels=True, nodelist=range(len(G.nodes()), len(H.nodes())), node_color='r', font_weight='bold')
     plt.savefig("tmp/H.png")
     TSP_to_file(H, "TSP/Instances_TSP/PLS_21_transf.tsp")
-    solver = TSPSolver.from_tspfile("TSP/Instances_TSP/PLS_21_transf.tsp")
-    solution = solver.solve()
-    print(solution.tour)
-    tour_atsp = TSPtour_to_ATSPtour(solution.tour)
-    print(tour_atsp)
-    # print the clusters of the tour
-    for i in range(len(tour_atsp)):
-        print(labels_km[tour_atsp[i]], end=" ")
-    print()
-    tour_gtspt = ATSPtour_to_GTSPtour(tour_atsp, labels_km)
-    print(tour_gtspt)
-    plot_tour(points, labels_km, tour_atsp, "tmp/tour_atsp.png")
-    plot_tour(points, labels_km, tour_gtspt, "tmp/tour_gtspt.png")
+    # solver = TSPSolver.from_tspfile("TSP/Instances_TSP/PLS_21_transf.tsp")
+    # solution = solver.solve()
+    # print(solution.tour)
+    # tour_atsp = TSPtour_to_ATSPtour(solution.tour)
+    # print(tour_atsp)
+    # # print the clusters of the tour
+    # for i in range(len(tour_atsp)):
+    #     print(labels_km[tour_atsp[i]], end=" ")
+    # print()
+    # tour_gtspt = ATSPtour_to_GTSPtour(tour_atsp, labels_km)
+    # print(tour_gtspt)
+    # plot_tour(inst.points, labels_km, tour_atsp, "tmp/tour_atsp.png")
+    # plot_tour(inst.points, labels_km, tour_gtspt, "tmp/tour_gtspt.png")
 
 
     

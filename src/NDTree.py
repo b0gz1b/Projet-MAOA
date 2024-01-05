@@ -1,6 +1,6 @@
 from typing import List
 import numpy as np
-from NDPoint import DPoint
+from DPoint import DPoint
 
 
 class NDTreeNode:
@@ -210,13 +210,13 @@ class NDTreeNode:
 		min_distance = np.inf
 		closest_child_index = 0
 		for i in range(len(self.children)):
-			distance = y.euclidean_distance(self.children[i].get_midde_point())
+			distance = y.euclidean_distance(self.children[i].get_middle_point())
 			if distance < min_distance:
 				min_distance = distance
 				closest_child_index = i
 		return closest_child_index
 	
-	def get_midde_point(self) -> DPoint:
+	def get_middle_point(self) -> DPoint:
 		"""
 		Computes the middle point of the current node.
 		:return: the middle point of the current node

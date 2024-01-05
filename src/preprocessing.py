@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.cluster import AffinityPropagation, KMeans
-from TSPparser import read_instance_from_file
+from TSP import TSP
 import matplotlib.pyplot as plt
 
 def affinity_propagation(points, damping=0.5, max_iter=1000, convergence_iter=15, copy=True, preference=None,
@@ -64,11 +64,10 @@ def plot_km(points, labels, cluster_centers):
     
 
 if __name__ == '__main__':
-    inst = read_instance_from_file("TSP/Instances_TSP/fnl4461.tsp")
-    print(inst)
+    inst = TSP.from_file("TSP/Instances_TSP/eil76.tsp")
 
-    cluster_centers_indices_af, labels_af = affinity_propagation(inst["COORDS"], damping=0.5)
-    cluster_centers_km, labels_km = k_means(inst["COORDS"], len(cluster_centers_indices_af))
+    cluster_centers_indices_af, labels_af = affinity_propagation(inst.points, damping=0.5)
+    cluster_centers_km, labels_km = k_means(inst.points, len(cluster_centers_indices_af))
     rearrange = np.random.permutation(len(cluster_centers_indices_af))
     cluster_centers_indices_af = cluster_centers_indices_af[rearrange]
     labels_af = np.array([np.where(rearrange == i)[0][0] for i in labels_af])
