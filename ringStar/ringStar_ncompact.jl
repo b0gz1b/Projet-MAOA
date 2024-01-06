@@ -249,7 +249,7 @@ function ring_star_ncompact(G, p)
 
 
        G_sepP = complete_digraph(nb_p)
-       Part,valuecut = mincut(G_sepP)  # Part is a vector indicating 1 and 2 for each node to be in partition 1 or 2
+       Part,valuecut = mincut(G_sepP, xsep)  # Part is a vector indicating 1 and 2 for each node to be in partition 1 or 2
 
        W=Int64[]
        for i in 1:nb_p
