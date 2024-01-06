@@ -1,8 +1,9 @@
 from GTSP import GTSP
+from DGTSPPoint import DGTSPPoint
 import numpy as np
 import heapq as hq
 
-def farthest_insertion(gtsp: GTSP) -> tuple[list[int], list[int]]:
+def farthest_insertion(gtsp: GTSP) -> DGTSPPoint:
     """
     Computes a farthest insertion tour.
     :param gtsp: the GTSP instance
@@ -40,8 +41,8 @@ def farthest_insertion(gtsp: GTSP) -> tuple[list[int], list[int]]:
         # If none of the clusters have already been visited, add the pair to the reserve
         else:
             reserve.append(next_pair)
-    return tour, cluster_tour
-def nearest_insertion(gtsp: GTSP) -> tuple[list[int], list[int]]:
+    return DGTSPPoint(gtsp, tour, cluster_tour)
+def nearest_insertion(gtsp: GTSP) -> DGTSPPoint:
     """
     Computes a nearest insertion tour.
     :param gtsp: the GTSP instance
@@ -79,8 +80,7 @@ def nearest_insertion(gtsp: GTSP) -> tuple[list[int], list[int]]:
         # If none of the clusters have already been visited, add the pair to the reserve
         else:
             reserve.append(next_pair)
-    return tour, cluster_tour
-
+    return DGTSPPoint(gtsp, tour, cluster_tour)
 def RP1_procedure(gtsp: GTSP, tour: list[int], cluster_tour: list[int]) -> tuple[list[int], list[int]]:
     """
     Apply the RP1 procedure to refine a tour (2-opt generalization)
@@ -92,12 +92,13 @@ def RP1_procedure(gtsp: GTSP, tour: list[int], cluster_tour: list[int]) -> tuple
     modified = True
     while modified:
         modified = False
+        best_tour = tour
+        best_cluster_tour = cluster_tour
+        best_d = gtsp.cost_time_ratio(tour)[0]
+        # find for every poi
         for c_alpha_ind in range(len(cluster_tour) - 2):
             for c_gamma_ind in range(c_alpha_ind + 2, len(cluster_tour)):
-                # Compute the previous length of the tour
-                prev_d = 0
-                for i in range(len(tour)):
-                    prev_d += np.linalg.norm(gtsp.points[tour[i]] - gtsp.points[tour[(i + 1) % len(tour)]])
+                
                 c_beta_ind = (c_alpha_ind + 1) % len(cluster_tour)
                 c_delta_ind = (c_gamma_ind + 1) % len(cluster_tour)
                 prec_alpha = tour[(c_alpha_ind - 1) % len(tour)]
@@ -135,39 +136,18 @@ def RP1_procedure(gtsp: GTSP, tour: list[int], cluster_tour: list[int]) -> tuple
                 new_cluster_tour = cluster_tour.copy()
                 new_cluster_tour[c_beta_ind] = cluster_tour[c_gamma_ind]
                 new_cluster_tour[c_gamma_ind] = cluster_tour[c_beta_ind]
-                for i in range(len(new_tour)):
-                    new_d += np.linalg.norm(gtsp.points[new_tour[i]] - gtsp.points[new_tour[(i + 1) % len(new_tour)]])
-                if new_d < prev_d:
-                    tour = new_tour
-                    cluster_tour = new_cluster_tour
+                new_d = gtsp.cost_time_ratio(new_tour)[0]
+                if new_d < best_d:
+                    best_tour = new_tour
+                    best_cluster_tour = new_cluster_tour
+                    best_d = new_d
                     modified = True
-                    break
+        if modified:
+            tour = best_tour
+            cluster_tour = best_cluster_tour
     return tour, cluster_tour
-
-def RP2_procedure(gtsp: GTSP, tour: list[int], cluster_tour: list[int]) -> tuple[list[int], list[int]]:
-    """
-    Apply the RP2 procedure to refine a tour.
-    :param gtsp: the GTSP instance
-    :param tour: the tour
-    :param cluster_tour: the cluster tour
-    :return: the refined tour and the refined cluster tour
-    """
-    cluster_h1 = np.argmin([len(gtsp.clusters[i]) for i in range(len(gtsp.clusters))])
-    # find the index of the cluster in the tour
-    start = cluster_tour.index(cluster_h1)
-    graph = {}
-    for i in range(len(cluster_tour) + 1):
-        cur_clust_ind = (i + start + 1) % len(cluster_tour)
-        next_clust_ind = (i + start + 2) % len(cluster_tour)
-        graph[cur_clust_ind] = []
-        for a in gtsp.clusters[cluster_tour[cur_clust_ind]]:
-            for b in gtsp.clusters[cluster_tour[next_clust_ind]]:
-                graph[a].append(b)
-    for w in gtsp.clusters[cluster_h1]:
-        pass # TODO: Bellman algorithm (topological order)
-
 if __name__ == "__main__":
-    inst = GTSP.from_file("TSP/Instances_TSP/eil76.tsp")
+    inst = GTSP.from_file("TSP/Instances_TSP/rd100.tsp")
     tour_f, cluster_tour_f = farthest_insertion(inst)
     print(tour_f, cluster_tour_f)
     inst.plot_tour(tour_f, "tmp/tour_farthest.png")

@@ -24,7 +24,7 @@ def affinity_propagation(points, damping=0.5, max_iter=1000, convergence_iter=15
     labels = af.labels_
     return cluster_centers_indices, labels
 
-def k_means(points, n_clusters=8, init='k-means++', n_init=10, max_iter=1000, tol=0.0001,
+def k_means(points, n_clusters=8, init='k-means++', n_init=50, max_iter=10000, tol=0.0001,
             verbose=0, random_state=None, copy_x=True, algorithm='lloyd'):
     """
     Clusters the given points using the k-means algorithm.

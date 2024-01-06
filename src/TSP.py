@@ -14,7 +14,7 @@ class TSP:
         :param distance_matrix: the distance matrix of the instance
         """
         self.name = name
-        self.dimension = dimension
+        self.d = dimension
         self.points = points
 
     @classmethod
@@ -38,5 +38,34 @@ class TSP:
                         y_coord = float(parts[2])
                         points[node_id - 1] = [x_coord, y_coord]
         return cls(name, dimension, points)
+    
+    def plot_instance(self, file_path=None):
+        """
+        Plots the instance.
+        """
+        fig, ax = plt.subplots()
+        ax.scatter(self.points[:, 0], self.points[:, 1])
+        if file_path is not None:
+            plt.savefig(file_path)
+        else:
+            plt.show()
+
+    def plot_tour(self, tour, file_path=None):
+        """
+        Plots a tour.
+        :param tour: the tour
+        """
+        fig, ax = plt.subplots()
+        ax.scatter(self.points[:, 0], self.points[:, 1])
+        for i in range(len(tour)):
+            ax.plot([self.points[tour[i]][0], self.points[tour[(i + 1) % len(tour)]][0]], [self.points[tour[i]][1], self.points[tour[(i + 1) % len(tour)]][1]], color='red')
+        if file_path is not None:
+            plt.savefig(file_path)
+        else:
+            plt.show()
+
+if __name__ == "__main__":
+    inst = TSP.from_file("TSP/Instances_TSP/att48.tsp")
+    inst.plot_instance("tmp/instance.png")
     
     
