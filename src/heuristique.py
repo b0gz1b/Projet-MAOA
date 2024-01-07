@@ -1,7 +1,25 @@
+from time import time
 from GTSP import GTSP
-from DGTSPPoint import DGTSPPoint
+from DGTSPPoint import DGTSPPoint, aux_n2opt
 import numpy as np
 import heapq as hq
+
+def random_tour(gtsp: GTSP) -> DGTSPPoint:
+    """
+    Computes a random tour.
+    :param gtsp: the GTSP instance
+    :return: the random tour and the corresponding cluster tour
+    """
+    tour = []
+    cluster_tour = []
+    for i in range(len(gtsp.clusters)):
+        tour.append(np.random.choice(gtsp.clusters[i]))
+    np.random.shuffle(tour)
+    for i in range(len(tour)):
+        for j in range(len(gtsp.clusters)):
+            if tour[i] in gtsp.clusters[j]:
+                cluster_tour.append(j)
+    return DGTSPPoint(gtsp, tour, cluster_tour)
 
 def farthest_insertion(gtsp: GTSP) -> DGTSPPoint:
     """
@@ -146,17 +164,54 @@ def RP1_procedure(gtsp: GTSP, tour: list[int], cluster_tour: list[int]) -> tuple
             tour = best_tour
             cluster_tour = best_cluster_tour
     return tour, cluster_tour
+
+def RP1_procedure_paral(gtsp: GTSP, tour: list[int], cluster_tour: list[int]) -> tuple[list[int], list[int]]:
+    """
+    Apply the RP1 procedure to refine a tour (2-opt generalization)
+    :param gtsp: the GTSP instance
+    :param tour: the tour
+    :param cluster_tour: the cluster tour
+    :return: the refined tour and the refined cluster tour
+    """
+    modified = True
+    cur_sol = DGTSPPoint(gtsp, tour, cluster_tour)
+    while modified:
+        modified = False
+        neighbors = cur_sol.neighbors_2opt()
+        for neighbor in neighbors:
+            if neighbor.value[0] < cur_sol.value[0]:
+                cur_sol = neighbor
+                modified = True
+    return cur_sol.tour, cur_sol.cluster_tour
 if __name__ == "__main__":
-    inst = GTSP.from_file("TSP/Instances_TSP/rd100.tsp")
-    tour_f, cluster_tour_f = farthest_insertion(inst)
-    print(tour_f, cluster_tour_f)
-    inst.plot_tour(tour_f, "tmp/tour_farthest.png")
-    tour_frp1, cluster_tour_frp1 = RP1_procedure(inst, tour_f, cluster_tour_f)
-    print(tour_frp1, cluster_tour_frp1)
-    inst.plot_tour(tour_frp1, "tmp/tour_farthest_rp1.png")
-    tour_n, cluster_tour_n = nearest_insertion(inst)
-    print(tour_n, cluster_tour_n)
-    inst.plot_tour(tour_n, "tmp/tour_nearest.png")
-    tour_nrp1, cluster_tour_nrp1 = RP1_procedure(inst, tour_n, cluster_tour_n)
-    print(tour_nrp1, cluster_tour_nrp1)
-    inst.plot_tour(tour_nrp1, "tmp/tour_nearest_rp1.png")
+    name = "pr107"
+    time_start = time()
+    inst = GTSP.from_file(f"TSP/Instances_TSP/{name}.tsp")
+    sol_f = farthest_insertion(inst)
+    tour_f, cluster_tour_f = sol_f.tour, sol_f.cluster_tour
+    sol_n = nearest_insertion(inst)
+    tour_n, cluster_tour_n = sol_n.tour, sol_n.cluster_tour
+    cost_f = inst.cost_time_ratio(tour_f)
+    cost_n = inst.cost_time_ratio(tour_n)
+    if cost_f[0] < cost_n[0]:
+        print("Farthest insertion is better")
+        inst.plot_tour(tour_f, f"tmp/tour_heur_pre_{name}.png")
+        print(cost_f)
+    else:
+        print("Nearest insertion is better")
+        inst.plot_tour(tour_n, f"tmp/tour_heur_pre_{name}.png")
+        print(cost_n)
+    print(f"Time: {time()-time_start}")
+    tour_frp1, cluster_tour_frp1 = RP1_procedure_paral(inst, tour_f, cluster_tour_f)
+    tour_nrp1, cluster_tour_nrp1 = RP1_procedure_paral(inst, tour_n, cluster_tour_n)
+    cost_frp1 = inst.cost_time_ratio(tour_frp1)
+    cost_nrp1 = inst.cost_time_ratio(tour_nrp1)
+    if cost_frp1[0] < cost_nrp1[0]:
+        print("Farthest insertion is better")
+        inst.plot_tour(tour_frp1, f"tmp/tour_heur_{name}.png")
+        print(cost_frp1)
+    else:
+        print("Nearest insertion is better")
+        inst.plot_tour(tour_nrp1, f"tmp/tour_heur_{name}.png")
+        print(cost_nrp1)
+    print(f"Time: {time()-time_start}")

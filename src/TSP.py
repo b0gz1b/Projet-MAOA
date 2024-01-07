@@ -66,6 +66,11 @@ class TSP:
 
 if __name__ == "__main__":
     inst = TSP.from_file("TSP/Instances_TSP/att48.tsp")
-    inst.plot_instance("tmp/instance.png")
+    inst.plot_instance("tmp/att48.png")
+    inst = TSP.from_file("TSP/Instances_TSP/eil76.tsp")
+    inst.plot_instance("tmp/eil76.png")
+    inst = TSP.from_file("TSP/Instances_TSP/rd100.tsp")
+    inst.plot_instance("tmp/rd100.png")
+
     
     

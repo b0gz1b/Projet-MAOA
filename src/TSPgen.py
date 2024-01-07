@@ -1,12 +1,14 @@
+from time import time
 import numpy as np
 import networkx as nx
+from GTSP import GTSP
 from TSP import TSP
 from preprocessing import affinity_propagation, k_means, plot_km
 import matplotlib.pyplot as plt
-# try:
-#     from concorde.tsp import TSPSolver
-# except ImportError:
-#     pass
+try:
+    from concorde.tsp import TSPSolver
+except ImportError:
+    pass
 
 def GTSP_to_ATSP(points, labels):
     """
@@ -97,7 +99,7 @@ def TSP_to_file(G, file_path):
         file.write("EDGE_WEIGHT_SECTION\n")
         for i in range(len(G.nodes())):
             for j in range(len(G.nodes())):
-                file.write(str(int(G[i][j]['weight'])) + " ")
+                file.write(str(int(G[i][j]['weight']) // 10) + " ")
             file.write("\n")
         file.write("EOF\n")
 
@@ -150,33 +152,43 @@ def plot_tour(points, labels, tour, file_path=None):
     else:    
         plt.savefig(file_path)
 if __name__ == '__main__':
-    inst = TSP.from_file("TSP/Instances_TSP/PLS_21.tsp")
-    cluster_centers_km, labels_km = k_means(inst.points, n_clusters=4, n_init=100)
+    name = "pr107"
+    time_start = time()
+    inst = TSP.from_file(f"TSP/Instances_TSP/{name}.tsp")
+    instgtsp = GTSP.from_file(f"TSP/Instances_TSP/{name}.tsp")
     # labels_km = [0,3,0,3,1,1,2,1,0,2,2,0,3,1,3,1,1,1,2,0,0]
     # plot_km(points, labels_km, cluster_centers_km)
+    labels_km = []
+    for i in range(len(instgtsp.points)):
+        for c in range(len(instgtsp.clusters)):
+            if i in instgtsp.clusters[c]:
+                labels_km.append(c)
     G = GTSP_to_ATSP(inst.points, labels_km)
     plt.figure()
-    nx.draw(G, pos=inst.points, with_labels=True, font_weight='bold')
-    plt.savefig("tmp/G.png")
+    nx.draw(G, with_labels=True, font_weight='bold')
+    plt.savefig(f"tmp/G_{name}.png")
     H = ATSP_to_TSP(G)
     # Draw the new nodes added to H compared to G
     plt.figure()
     nx.draw(H, pos=nx.spring_layout(H), with_labels=True, nodelist=range(len(G.nodes()), len(H.nodes())), node_color='r', font_weight='bold')
-    plt.savefig("tmp/H.png")
-    TSP_to_file(H, "TSP/Instances_TSP/PLS_21_transf.tsp")
-    # solver = TSPSolver.from_tspfile("TSP/Instances_TSP/PLS_21_transf.tsp")
-    # solution = solver.solve()
-    # print(solution.tour)
-    # tour_atsp = TSPtour_to_ATSPtour(solution.tour)
-    # print(tour_atsp)
-    # # print the clusters of the tour
-    # for i in range(len(tour_atsp)):
-    #     print(labels_km[tour_atsp[i]], end=" ")
-    # print()
-    # tour_gtspt = ATSPtour_to_GTSPtour(tour_atsp, labels_km)
-    # print(tour_gtspt)
-    # plot_tour(inst.points, labels_km, tour_atsp, "tmp/tour_atsp.png")
-    # plot_tour(inst.points, labels_km, tour_gtspt, "tmp/tour_gtspt.png")
+    plt.savefig(f"tmp/H_{name}.png")
+    TSP_to_file(H, f"TSP/Instances_TSP/{name}_transf.tsp")
+    solver = TSPSolver.from_tspfile(f"TSP/Instances_TSP/{name}_transf.tsp")
+    solution = solver.solve()
+    print(solution.tour)
+    tour_atsp = TSPtour_to_ATSPtour(solution.tour)
+    print(tour_atsp)
+    # print the clusters of the tour
+    for i in range(len(tour_atsp)):
+        print(labels_km[tour_atsp[i]], end=" ")
+    print()
+    tour_gtspt = ATSPtour_to_GTSPtour(tour_atsp, labels_km)
+    elapsed_time = time() - time_start
+    print("Elapsed time: ", elapsed_time)
+    print(tour_gtspt)
+    inst.plot_tour(tour_atsp, f"tmp/tour_atsp_{name}.png")
+    instgtsp.plot_tour(tour_gtspt, f"tmp/tour_gtsp_{name}.png")
+    print(instgtsp.cost_time_ratio(tour_gtspt))
 
 
     

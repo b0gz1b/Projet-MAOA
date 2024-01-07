@@ -157,8 +157,8 @@ class GTSP:
         base = 10 * (dist_station_1 + dist_station_2)
         dist_metro_p = base
         dist_metro_m = base
-        ratio_metro_p = 0
-        ratio_metro_m = 0
+        ratio_metro_p = 1
+        ratio_metro_m = 1
         prev_station_p = [station_1]
         prev_station_m = [station_1]
         not_arrived_p = True
