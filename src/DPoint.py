@@ -1,5 +1,4 @@
 import numpy as np
-from Capacity import Capacity
 
 class DPoint:
 	"""
@@ -129,7 +128,7 @@ class DPoint:
 		elif direction == "min":
 			return np.dot(np.flip(np.sort(self.value)), weights)
 	
-	def choquet(self, cap: Capacity, direction: str = "max") -> float:
+	def choquet(self, cap, direction: str = "max") -> float:
 		"""
 		Computes the Choquet integral of the values of the point.
 		:param cap: the capacity
@@ -148,7 +147,7 @@ class DPoint:
 			cv += (x_p[i] - x_p[i-1]) * cap.v(X)
 		return cv
 	
-	def evaluate(self, dm: Capacity | list[float], pref_model: str) -> float:
+	def evaluate(self, dm, pref_model: str) -> float:
 		"""
 		Computes the value of the point according to a preference model.
 		:param dm: the decision maker, either the weights or the capacity

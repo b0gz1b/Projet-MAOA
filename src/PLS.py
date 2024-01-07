@@ -73,7 +73,7 @@ def select(gtsp: GTSP, population: List[DGTSPPoint]) -> DGTSPPoint:
 	return best_point
 	
 if __name__ == "__main__":
-	name = "a280"
+	name = "st70"
 	time_start = time.time()
 	inst = GTSP.from_file(f"TSP/Instances_TSP/{name}.tsp")
 	fi = heur.farthest_insertion(inst)
