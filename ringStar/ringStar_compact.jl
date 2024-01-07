@@ -17,7 +17,7 @@ function ring_star_compact(G, p)
 
     @variable(m, 0 <= z[1:G.nb_points, 1:G.nb_points] <= p-1, Int)
 
-    @objective(m, Min, sum(sum(c[i, j] * x[i, j] for j = 1:G.nb_points) for i = 1:G.nb_points) + sum(sum(c[i, j] * y[i, j] for j = 1:G.nb_points) for i = 1:G.nb_points))
+    @objective(m, Min, sum(sum(c[i, j] * x[i, j] for j in 1:G.nb_points) for i in 1:G.nb_points) + sum(sum(c[i, j] * y[i, j] for j in 1:G.nb_points) for i in 1:G.nb_points))
 
     #pas d'arete i à i
     for i in 1:G.nb_points
@@ -70,11 +70,6 @@ function ring_star_compact(G, p)
         end
     end
 
-    # for j in 2:G.nb_points
-    #   # on veut i dans V \ {j}
-    #   @constraint(m, z[1, j] <= (p-1)*x[1, j])
-    # end
-
     # print(m)
 	println()
 	
@@ -125,14 +120,14 @@ function ring_star_compact(G, p)
         push!(cycle,1)
         push!(cycle,j)
         i=j
-        tmp=1
+        prev=1
         while (i!=1)
             j=1
-            while  ( j==i || (value(x[i,j]) < 0.999 && value(x[j,i]) < 0.999) || j==tmp ) 
+            while  ( j==i || j==prev || (value(x[i,j]) < 0.999 && value(x[j,i]) < 0.999) ) 
                 j=j+1
             end
             push!(cycle,j)
-            tmp=i
+            prev=i
             i=j
 		end
         println("S = ", cycle)

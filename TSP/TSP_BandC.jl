@@ -1,3 +1,4 @@
+using MathOptInterface
 using JuMP
 using CPLEX
 using CPUTime
@@ -53,7 +54,7 @@ function BandC_TSP(G)
     #variables
     @variable(LP, x[1:G.nb_points, 1:G.nb_points], Bin)  # We will only use x_{ij} with i<j
     # objective function
-    @objective(LP, Min, sum((sum(x[i, j] * c[i, j]) for j = i+1:G.nb_points) for i = 1:G.nb_points ) )
+    @objective(LP, Min, sum(sum(x[i, j] * c[i, j] for j = i+1:G.nb_points) for i = 1:G.nb_points ))
     
 
     # Edge constraints
@@ -109,7 +110,7 @@ function BandC_TSP(G)
            
           #println(con)
            
-           MOI.submit(LP, MOI.LazyConstraint(cb_data), con) 
+           MathOptInterface.submit(LP, MathOptInterface.LazyConstraint(cb_data), con) 
            nbViolatedMengerCut_fromIntegerSep=nbViolatedMengerCut_fromIntegerSep+1
            
         end
@@ -135,7 +136,8 @@ function BandC_TSP(G)
                xsep[i,j]=callback_value(cb_data, x[i,j])
            end
         end
-        
+       
+      
        Part,valuecut=mincut(G_sep,xsep)  # Part is a vector indicating 1 and 2 for each node to be in partition 1 or 2
        
        W=Int64[]
@@ -154,7 +156,7 @@ function BandC_TSP(G)
            
       #     println(con)
            
-           MOI.submit(LP, MOI.UserCut(cb_data), con) 
+           MathOptInterface.submit(LP, MathOptInterface.UserCut(cb_data), con) 
            nbViolatedMengerCut_fromFractionalSep=nbViolatedMengerCut_fromFractionalSep+1
          
        end
@@ -278,8 +280,7 @@ function BandC_TSP(G)
      xvec=vcat([LP[:x][i, j] for i = 1:G.nb_points for j = i+1:G.nb_points])
      solvec=vcat([sol[i, j] for i = 1:G.nb_points for j = i+1:G.nb_points])
 
-     MOI.submit(LP, MOI.HeuristicSolution(cb_data), xvec, solvec)
-    
+     MathOptInterface.submit(LP, MathOptInterface.HeuristicSolution(cb_data), xvec, solvec)
    end
   #
   #################
@@ -287,13 +288,13 @@ function BandC_TSP(G)
   #################
   # Setting callback in CPLEX
     # our lazySep_ViolatedAcyclic function sets a LazyConstraintCallback of CPLEX
-    MOI.set(LP, MOI.LazyConstraintCallback(), lazySep_ViolatedMengerCut) 
+    MathOptInterface.set(LP, MathOptInterface.LazyConstraintCallback(), lazySep_ViolatedMengerCut) 
     
     # our userSep_ViolatedAcyclic function sets a LazyConstraintCallback of CPLEX   
-    MOI.set(LP, MOI.UserCutCallback(), userSep_ViolatedMengerCut)
+    MathOptInterface.set(LP, MathOptInterface.UserCutCallback(), userSep_ViolatedMengerCut)
     
     # our primal heuristic to "round up" a primal fractional solution
-    MOI.set(LP, MOI.HeuristicCallback(), primalHeuristicTSP)
+    MathOptInterface.set(LP, MathOptInterface.HeuristicCallback(), primalHeuristicTSP)
   #
   #################
 
@@ -307,7 +308,7 @@ function BandC_TSP(G)
    status = termination_status(LP)
 
    # un petit affichage sympathique
-   if status == JuMP.MathOptInterface.OPTIMAL
+   if status == MathOptInterface.OPTIMAL
       println("Valeur optimale = ", objective_value(LP))
       println("Solution primale optimale :")
       

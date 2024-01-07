@@ -3,3 +3,11 @@ import Pkg
 Pkg.add("JuMP")
 Pkg.add("CPLEX")
 Pkg.add("Shuffle")
+Pkg.add("Combinatorics")
+
+S=[1, 2, 14, 3, 4, 5, 6, 12, 7, 13, 8, 11, 9, 10, 1]
+Valeur: 30.878503892588004
+
+
+Solution BandC :S=[2, 14, 3, 4, 5, 6, 12, 7, 13, 8, 11, 9, 10, 1, 2]
+Valeur: 30.878503892588004
