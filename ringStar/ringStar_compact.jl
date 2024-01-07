@@ -133,7 +133,7 @@ function ring_star_compact(G, p)
         println("S = ", cycle)
         println("Temps de résolution :", solve_time(m))
 
-        return stations, affectations, cycle
+        return stations, affectations, cycle, solve_time(m)
 	else
 		 println("Problème lors de la résolution")
 	end

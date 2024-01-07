@@ -13,28 +13,6 @@ include("../TSP/TSP_IO.jl")
 
 # MathOptInterface is a shortcut for MathematicalOptimizationInterface
 
-# Fonction d'algorithme de coupe minimale (Karger's algorithm)
-# function mincut(graph)
-#     while nv(graph) > 2
-#         # Choisissez une arête au hasard
-#         edge = rand(1:ne(graph))
-
-#         # Obtenez les extrémités de l'arête
-#         src, dst = src(ei(graph, edge)), dst(ei(graph, edge))
-
-#         # Fusionnez les nœuds correspondants
-#         contract!(graph, src, dst)
-#     end
-
-#     # La coupe résultante est donnée par les deux nœuds restants
-#     Part = connected_components(graph)
-
-#     # La valeur de la coupe est le nombre d'arêtes entre les deux partitions
-#     valuecut = count(e -> in_component(e.src, Part) != in_component(e.dst, Part), edges(graph))
-
-#     return Part, valuecut
-# end
-
 function edge_value(x,i,j)
    if (i<j)
       return value(x[i,j])
@@ -113,23 +91,11 @@ function ring_star_ncompact(G, p)
         @constraint(m, sum(x[j, i] for j in 1:i-1) + sum(x[i, j] for j in i+1:G.nb_points) == 2*y[i, i]) #4
     end
 
-    # for S in sous_ensembles([i for i in 2:G.nb_points], 2)
-    #     V_prive_S = setdiff([i for i in 1:G.nb_points], S)
-    #     deltaS = couples_possibles(S, V_prive_S)
-    #     @constraint(m, sum(sum(x[i, j] for (i,j) in e) for e in sous_ensembles(deltaS, 1)) >= 2 * sum(sum(y[i, i] for j in S) for i in S))
-    # end
-
     for i in 2:G.nb_points
         for j in 1:G.nb_points
             @constraint(m, y[j, j] >= x[i, j]) #9
         end
     end
-
-    # for W in sous_ensembles([i for i in 2:G.nb_points], 2)
-    #     V_prive_W = setdiff([i for i in 1:G.nb_points], W)
-    #     deltaW = couples_possibles(W, V_prive_W)
-    #     @constraint(m, sum(sum(x[i, j] for (i,j) in e) for e in sous_ensembles(deltaW, 1)) >= 2 * sum(sum(y[i, j] for j in W) for i in W))
-    # end
 
    
    # Initialization of a graph to compute min cut for the fractional separation
@@ -181,22 +147,6 @@ function ring_star_ncompact(G, p)
             push!(tmp, pointsMedians[ind])
         end
         W = tmp
-        #on verifie si le cycle est unique
-        # unique = true
-        # if 1 not in W
-        #     unique = false
-        # end
-        
-        # if unique
-        #     for pt in pointsMedians
-        #         if pt in W
-        #             continue
-        #         else
-        #             unique = false
-        #         end
-        #     end
-        # end
-
         #ajout de contrainte si le cycle ne passe pas par 1 ou/et non unique
         if (size(W,1)!=nb_p || !(1 in W))    # size(W) renvoie sinon (taille,)
       
@@ -254,11 +204,6 @@ function ring_star_ncompact(G, p)
 
 
        G_sepP = complete_graph(nb_p)
-    #    println(is_directed(G_sepP))
-    #    println(size(G_sepP))
-    #    println(G_sepP)
-    #    println(xsep)
-
 
 
        Part,valuecut = mincut(G_sepP, xsep)  # Part is a vector indicating 1 and 2 for each node to be in partition 1 or 2
@@ -495,161 +440,10 @@ function ring_star_ncompact(G, p)
       println("   from IntegerSep : ", nbViolatedMengerCut_fromIntegerSep)
       println("   from FractionalSep :", nbViolatedMengerCut_fromFractionalSep)
 
-      return stations, affectations,S
+      return stations, affectations, S, solve_time(m)
     else
       println("Problème lors de la résolution")
     end
      
   
 end
-
-
-
-
-
-# function ring_star_ncompact(G, p)
-
-#     c = calcul_dist(G)
-    
-# 	println("Création du PLNE")
-#     m = Model(CPLEX.Optimizer)
-
-#     @variable(m, y[1:G.nb_points, 1:G.nb_points], Bin)
-
-#     @variable(m, x[1:G.nb_points, 1:G.nb_points] , Bin)
-
-#     @objective(m, Min, sum(sum(c[i, j] * x[i, j] for j in 1:G.nb_points) for i in 1:G.nb_points) + sum(sum(c[i, j] * y[i, j] for j in 1:G.nb_points) for i in 1:G.nb_points))
-
-#     #pas d'arete i à i
-#     for i in 1:G.nb_points
-#         @constraint(m, x[i, i] == 0)
-#     end
-
-#     #contraintes de stations
-#     @constraint(m, y[1, 1] == 1)
-
-#     for j in 2:G.nb_points
-# 		@constraint(m, y[1, j] == 0)
-# 	end
-
-#     @constraint(m, sum(y[i, i] for i in 1:G.nb_points) == p) #1
-
-#     for i in 1:G.nb_points
-#         @constraint(m, sum(y[i, j] for j in 1:G.nb_points) == 1) #2
-#     end
-
-#     for i in 1:G.nb_points
-#         for j in 1:G.nb_points
-#             if i!=j
-#                 @constraint(m, y[i, j] <= y[j, j]) #(3)
-#             end
-#         end
-#     end
-
-#     for i in 1:G.nb_points
-#         @constraint(m, sum(x[j, i] for j in 1:i-1) + sum(x[i, j] for j in i+1:G.nb_points) == 2*y[i, i]) #4
-#     end
-
-#     for S in sous_ensembles([i for i in 2:G.nb_points], 2)
-#         V_prive_S = setdiff([i for i in 1:G.nb_points], S)
-#         deltaS = couples_possibles(S, V_prive_S)
-#         @constraint(m, sum(sum(x[i, j] for (i,j) in e) for e in sous_ensembles(deltaS, 1)) >= 2 * sum(sum(y[i, i] for j in S) for i in S))
-#     end
-
-#     for i in 2:G.nb_points
-#         for j in 1:G.nb_points
-#             @constraint(m, y[j, j] >= x[i, j]) #9
-#         end
-#     end
-
-#     # for W in sous_ensembles([i for i in 2:G.nb_points], 2)
-#     #     V_prive_W = setdiff([i for i in 1:G.nb_points], W)
-#     #     deltaW = couples_possibles(W, V_prive_W)
-#     #     @constraint(m, sum(sum(x[i, j] for (i,j) in e) for e in sous_ensembles(deltaW, 1)) >= 2 * sum(sum(y[i, j] for j in W) for i in W))
-#     # end
-
-#     print(m)
-# 	println()
-	
-# 	println("Résolution du PLNE par le solveur")
-# 	optimize!(m)
-#    	println("Fin de la résolution du PLNE par le solveur")
-   	
-# 	#println(solution_summary(m, verbose=true))
-
-# 	status = termination_status(m)
- 
-# 	# un petit affichage sympathique
-# 	if status == MathOptInterface.OPTIMAL
-# 		println("Valeur optimale = ", objective_value(m))
-# 		println("Solution primale optimale :")
-		
-#         stations = Int64[]
-#         for i in 1:G.nb_points
-#             if (value(y[i, i]) > 0.999)
-#                 push!(stations, i)
-#             end
-#         end
-
-#         println("Stations = ", stations)
-
-#         affectations = []
-#         for station in stations
-#             l = Int64[]
-#             push!(l, station)
-#             for i in 1:G.nb_points
-#                 if i!=station
-#                     if (value(y[i, station]) > 0.999)
-#                         push!(l, i)
-#                     end
-#                 end
-#             end
-#             push!(affectations, l)
-#         end
-
-#         println("Affectations =", affectations)
-
-# 		cycle = Int64[]
-#         i=1
-#         j=2
-#         while (value(x[i, j]) < 0.999) 
-#      	    j=j+1
-#         end        
-#         push!(cycle,1)
-#         push!(cycle,j)
-#         i=j
-#         tmp=1
-#         while (i!=1)
-#             j=1
-#             while  ( j==i || (value(x[i,j]) < 0.999 && value(x[j,i]) < 0.999) || j==tmp ) 
-#                 j=j+1
-#             end
-#             push!(cycle,j)
-#             tmp=i
-#             i=j
-# 		end
-#         println("S = ", cycle)
-#         println("Temps de résolution :", solve_time(m))
-
-#         return stations, affectations, cycle
-# 	else
-# 		 println("Problème lors de la résolution")
-# 	end
-
-# end
-
-# function sous_ensembles(S, n)
-#     #retourne les sous ensembles de S de taille >= n
-#     sous_ensembles = collect(powerset(S))
-#     return filter(x -> length(x) >= n, sous_ensembles)
-# end
-
-# function couples_possibles(l1, l2)
-#     resultats = []
-#     for e1 in l1
-#         for e2 in l2
-#             push!(resultats, (e1, e2))
-#         end
-#     end
-#     return resultats
-# end
