@@ -3,8 +3,10 @@ using JuMP
 using CPLEX
 using CPUTime
 using Graphs
-using LightGraphs
-using MetaGraphs
+# using LightGraphs
+# using MetaGraphs
+# using GraphIO
+# using SimpleGraphs
 using Combinatorics
 
 include("../TSP/TSP_IO.jl")
@@ -144,13 +146,13 @@ function ring_star_ncompact(G, p)
         pointsMedians = Int64[]
         for i in 1:G.nb_points
             if (callback_value(cb_data, y[i,i]) > 0.999)
-            push!(pointsMedians, i)
+                push!(pointsMedians, i)
             end
         end
 
         nb_p = size(pointsMedians,1)
         # Get the x value from cb_data and round it
-        xsep =zeros(Int64, nb_p, nb_p);
+        xsep =zeros(Float64, nb_p, nb_p);
         
         for i in 1:nb_p
            for j in 1:nb_p
@@ -228,7 +230,7 @@ function ring_star_ncompact(G, p)
         pointsMedians = Int64[]
         for i in 1:G.nb_points
             if (callback_value(cb_data, y[i,i]) > 0.001)
-            push!(pointsMedians, i)
+                push!(pointsMedians, i)
             end
         end
 
@@ -244,11 +246,21 @@ function ring_star_ncompact(G, p)
                          xsep[i,j]=callback_value(cb_data, x[pointsMedians[i],pointsMedians[j]])
                      end
                  end
+                 if xsep[i,j] < 0
+                    xsep[i,j] = 0
+                 end
             end
          end
 
 
-       G_sepP = complete_digraph(nb_p)
+       G_sepP = complete_graph(nb_p)
+    #    println(is_directed(G_sepP))
+    #    println(size(G_sepP))
+    #    println(G_sepP)
+    #    println(xsep)
+
+
+
        Part,valuecut = mincut(G_sepP, xsep)  # Part is a vector indicating 1 and 2 for each node to be in partition 1 or 2
 
        W=Int64[]
@@ -293,13 +305,13 @@ function ring_star_ncompact(G, p)
     pointsMedians = Int64[]
     for i in 1:G.nb_points
         if (callback_value(cb_data, y[i,i]) > 0)
-        push!(pointsMedians, i)
+            push!(pointsMedians, i)
         end
     end
 
      nb_p = size(pointsMedians,1)
      # Get the x value from cb_data 
-     xfrac =zeros(Int64, nb_p, nb_p);    
+     xfrac =zeros(Float64, nb_p, nb_p);    
 
     for i in 1:nb_p
         for j in 1:nb_p
@@ -346,7 +358,7 @@ function ring_star_ncompact(G, p)
      end
      
      cpt=0
-     while ( (cpt!=G.nb_points-1) && (size(L)!=0) )
+     while ( (cpt!=nb_p-1) && (size(L)!=0) )
      
         (i,j,val)=pop!(L)   
 

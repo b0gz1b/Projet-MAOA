@@ -139,7 +139,6 @@ function BandC_TSP(G)
        
       
        Part,valuecut=mincut(G_sep,xsep)  # Part is a vector indicating 1 and 2 for each node to be in partition 1 or 2
-       
        W=Int64[]
        for i in 1:G.nb_points
           if Part[i]==1

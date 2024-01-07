@@ -8,7 +8,7 @@ include("ringStar_ncompact.jl")
 
 function Resoud_ringStar(filename)
 
-	p = 5
+	p = 26
 
 	I = Read_undirected_TSP(filename)
 	println(I)
