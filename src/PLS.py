@@ -19,6 +19,8 @@ def P0(gtsp: GTSP, verbose: int = 0) -> NDTree:
 	p0 = NDTree(gtsp.d, NUMBER_OF_CHILDREN(gtsp.d), MAX_LEAF_SIZE)
 	p0.update(heur.farthest_insertion(gtsp), verbose = True if verbose == 2 else False)
 	p0.update(heur.nearest_insertion(gtsp), verbose = True if verbose == 2 else False)
+	for i in range(20):
+		p0.update(heur.random_tour(gtsp), verbose = True if verbose == 2 else False)
 	return p0
 
 def PLS(gtsp: GTSP, initial_pop: NDTree = None, verbose: int = 0) -> List[DGTSPPoint]:
@@ -71,7 +73,9 @@ def select(gtsp: GTSP, population: List[DGTSPPoint]) -> DGTSPPoint:
 	return best_point
 	
 if __name__ == "__main__":
-	inst = GTSP.from_file("TSP/Instances_TSP/att48.tsp")
+	name = "st70"
+	time_start = time.time()
+	inst = GTSP.from_file(f"TSP/Instances_TSP/{name}.tsp")
 	fi = heur.farthest_insertion(inst)
 	ni = heur.nearest_insertion(inst)
 	print(fi)
@@ -81,9 +85,12 @@ if __name__ == "__main__":
 	print(sols)
 
 	selected = select(inst, sols)
-	print(selected)
-	inst.plot_tour(selected.tour, "tmp/selected.png")
-	for i,s in enumerate(sols):
-		if s != selected:
-			inst.plot_tour(s.tour, "tmp/tour_{}.png".format(i))
+	print(inst.cost_time_ratio(selected.tour))
+	# inst.plot_tour(selected.tour, f"tmp/selected_{name}.png")
+	print(f"Time: {time.time()-time_start}")
+	i = 0
+	for sol in sols:
+		inst.plot_tour(sol.tour, f"tmp/tour_{name}_{i}.png")
+		print(inst.cost_time_ratio(sol.tour))
+		i += 1
 

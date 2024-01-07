@@ -1,9 +1,35 @@
-# Projet-MAOA
+# Projet-MAOA : Autour du tracé d'un métro circulaire
 
-## TODO
+This repository contains the code for the project of the course MAOA (Modèles et Applications en Ordonnancement et optimisation combinAtoire)
 
-- [ ] Classe pour les instances de TSP
-- [ ] Classe pour les instances de GTSP
-- [ ] Heuristiques farthest, nearest et cheapest insertion
-- [ ] Procédure d'amélioration RP1, basée sur le 2-opt
-- [ ] Procédure d'amélioration RP2, basée sur un réseau dont chaque cluster est une couche, avec une couche supplémentaire mirroir du premier cluster. On applique ensuite l'algorithme de Bellman.
+## Table of contents
+
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Usage](#usage)
+
+## Introduction
+
+We have a set of points on a map corresponding to the centres of densely populated areas where stations for this line could potentially be installed. We want to draw the route of the line passing through only p of these points: users from the surrounding areas will walk to the nearest station. The aim is to minimise the length of journeys on foot and by public transport for users of the line.
+
+## Requirements
+
+For the heuristic part:
+
+- Python 3.10 or higher
+- NumPy library
+- Matplotlib library
+- scikit-learn library
+- networkx library
+- PyConcorde library (<https://github.com/jvkersch/pyconcorde>)
+
+To install the libraries, run the following commands:
+
+```bash
+pip install numpy matplotlib scikit-learn networkx
+pip install 'pyconcorde @ git+https://github.com/jvkersch/pyconcorde'
+```
+
+## Usage
+
+You can run every file separately, code used for the report is written in the files mentioned in the report.
