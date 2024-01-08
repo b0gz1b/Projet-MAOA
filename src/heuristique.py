@@ -179,12 +179,12 @@ def RP1_procedure_paral(gtsp: GTSP, tour: list[int], cluster_tour: list[int]) ->
         modified = False
         neighbors = cur_sol.neighbors_2opt()
         for neighbor in neighbors:
-            if neighbor.value[0] < cur_sol.value[0]:
+            if neighbor.value[0] > cur_sol.value[0]:
                 cur_sol = neighbor
                 modified = True
     return cur_sol.tour, cur_sol.cluster_tour
 if __name__ == "__main__":
-    name = "pr107"
+    name = "burma14"
     time_start = time()
     inst = GTSP.from_file(f"TSP/Instances_TSP/{name}.tsp")
     sol_f = farthest_insertion(inst)
