@@ -15,7 +15,7 @@ function Resoud_ringStar(filename)
 	filename_inst = replace(filename, ".tsp" => "_inst")
     WritePdf_visualization_TSP(I, filename_inst)
 
-	p = 6
+	p = 4
 
 	@time @CPUtime stations, affectations, S, time = ring_star_compact(I, p) # on le résout
 
@@ -38,7 +38,7 @@ function Resoud_ringStar(filename)
 
 	@time @CPUtime stations, affectations, S, time = ring_star_ncompact(I, p) # on le résout
  
-	val_RingStarNCompact=Compute_value_cycleRingStar(I, S)
+	val_RingStarNCompact=Cout(I, S, affectations)
 	mean_RingStarNCompact = Mean_cout_dist_min(I, S, affectations)
 	ratio_RingStarNCompact = Ratio(I, S, affectations)
 

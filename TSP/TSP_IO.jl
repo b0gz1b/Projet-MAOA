@@ -143,9 +143,10 @@ function Cout(I, S, affectations)
 	res = 0
 	for aff_i in affectations
 		i = aff_i[1]
-		for ind_j in 2:size(aff_i,1)
-			j = aff_i[ind_j]
-			res = res + 10*dist(I, i, j) 
+		for j in aff_i
+			if (i != j)
+				res = res + 10*dist(I, i, j) 
+			end
 		end
 	end
 	return res + Compute_value_cycleRingStar(I, S)
