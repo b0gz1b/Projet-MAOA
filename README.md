@@ -30,6 +30,13 @@ pip install numpy matplotlib scikit-learn networkx
 pip install 'pyconcorde @ git+https://github.com/jvkersch/pyconcorde'
 ```
 
+For the MIP part you'll need julia and the following packages:
+
+- JuMP
+- CPLEX
+- Shuffle
+- Combinatorics
+
 ## Usage
 
-You can run every file separately, code used for the report is written in the files mentioned in the report.
+You can run every file separately, code used for the report is written in the files mentioned in the report. Heuristic methods are in the `src` folder and MIP methods are in the `ringStar` folder.
